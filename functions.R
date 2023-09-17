@@ -25,12 +25,19 @@ plot_dat <- function(data) {
          aes(x = X_group,
              y = Value,
              col = Dupl)) +
-    geom_point() +
     geom_line(aes(group = Sample), col = "grey50")+
+    geom_point() +
+    scale_color_manual(values = c("#00baff","goldenrod"))+
     ylim(0,NA) +
     scale_x_continuous(breaks = 1:N_groups, labels = LETTERS[1:N_groups] )+
     theme_bw() +
-    theme(axis.title.x = element_blank())
+    theme(axis.title.x = element_blank(),
+          axis.text = element_text(family = "mono"),
+          axis.title.y = element_text(family = "mono"),
+          legend.text = element_text(family = "mono"), 
+          legend.title = element_text(family = "mono")
+          )
+  ggsave("synth_data.png", dpi = 300, height=3.5,width = 3)
 }
 
 
