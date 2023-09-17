@@ -20,6 +20,7 @@ plot_dat <- function(data) {
   data <- data |>
     dplyr::mutate(X_group = as.integer(as.factor(Group)),
                   X_group = ifelse(Dupl == "1", X_group - 0.2,  X_group + 0.2))
+  N_groups <- floor(max(data$X_group))
   ggplot(data, 
          aes(x = X_group,
              y = Value,
@@ -27,7 +28,7 @@ plot_dat <- function(data) {
     geom_point() +
     geom_line(aes(group = Sample), col = "grey50")+
     ylim(0,NA) +
-    scale_x_continuous(breaks = 1:15, labels = LETTERS[1:15] )+
+    scale_x_continuous(breaks = 1:N_groups, labels = LETTERS[1:N_groups] )+
     theme_bw() +
     theme(axis.title.x = element_blank())
 }

@@ -2,7 +2,7 @@ library(ggplot2)
 library(truncnorm)
 library(brms)
 
-### analyis ###
+### analysis ###
 
 # make data
 source("functions.R")
