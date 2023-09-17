@@ -2,22 +2,18 @@ library(ggplot2)
 library(truncnorm)
 library(brms)
 
-# analyis
+### analyis ###
+
+# make data
 source("functions.R")
 ds <- syntdat(N_groups   = 3,
-              N_samples  = c(6,6,10),
+              N_samples  = c(6,6,6),
               effects    = c(.3,-.2),
               sd_samples = .1,
               sd_dups    = .05)
 
-# get and plot data
-ggplot(ds, 
-       aes(x = Group,
-           y = Value,
-           col = Dupl)) +
-  geom_point(position = position_dodge(width = 0.5)) +
-  ylim(0,NA) +
-  theme_bw()
+# plot data
+plot_dat(ds)
 
 # model data
 f <- brmsformula(Value ~ Group + (1|Sample))
@@ -31,9 +27,9 @@ fit00 <- brm(f, data = ds,
 # prior_summary(fit)
 fit00
 
-# fit01 <- update(fit00, 
-#               newdata = ds, 
-#               chains = 4,
-#               cores = 4,
-#               iter = 5000)
-# fit01
+fit01 <- update(fit00,
+              newdata = ds,
+              chains = 4,
+              cores = 4,
+              iter = 5000)
+fit01
