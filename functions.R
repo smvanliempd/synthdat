@@ -5,10 +5,10 @@ syntdat <- function(N_groups, N_samples, effects, sd_samples, sd_dups, seed = 12
   d <- sapply(1:N_groups, function(i) {
     v <- rtruncnorm(N_samples[i], a = 0, mean = 1 + effects[i], sd = sd_samples)
     vv <- sapply(1:N_samples[i], function(j){ 
-      data.frame(Group = LETTERS[i],
+      data.frame(Treatment = LETTERS[i],
                  Sample = paste0(LETTERS[i],j),
                  Dupl = as.character(1:2),
-                 Value = rtruncnorm(2, a = 0, mean = v[j], sd = sd_dups))
+                 Value = rtruncnorm(2, a = 0, mean = v[j], sd = sd_dups[i]))
     }, simplify = FALSE )
     vv <- do.call(rbind,vv)
   },simplify = FALSE)
@@ -18,7 +18,7 @@ syntdat <- function(N_groups, N_samples, effects, sd_samples, sd_dups, seed = 12
 # plot 
 plot_dat <- function(data) {
   data <- data |>
-    dplyr::mutate(X_group = as.integer(as.factor(Group)),
+    dplyr::mutate(X_group = as.integer(as.factor(Treatment)),
                   X_group = ifelse(Dupl == "1", X_group - 0.2,  X_group + 0.2))
   N_groups <- floor(max(data$X_group))
   ggplot(data, 
@@ -29,9 +29,11 @@ plot_dat <- function(data) {
     geom_point() +
     scale_color_manual(values = c("#00baff","goldenrod"))+
     ylim(0,NA) +
-    scale_x_continuous(breaks = 1:N_groups, labels = LETTERS[1:N_groups] )+
+    scale_x_continuous(name = "Treatment",
+                       breaks = 1:N_groups, 
+                       labels = LETTERS[1:N_groups] )+
     theme_bw() +
-    theme(axis.title.x = element_blank(),
+    theme(axis.title.x = element_text(family = "mono"),
           axis.text = element_text(family = "mono"),
           axis.title.y = element_text(family = "mono"),
           legend.text = element_text(family = "mono"), 
