@@ -1,59 +1,34 @@
 library(ggplot2)
-library(truncnorm)
 library(brms)
-
 ### analysis ###
 
 # make data
 source("functions.R")
-ds <- syntdat(N_groups   = 3,
-              N_samples  = c(6,6,6),
-              effects    = c(.3,-.2),
-              sd_samples = .1,
-              sd_dups    = c(.05, .01, 0.09))
+ds <- syntdat(n_Run = 3,
+              n_Treatment = 3,
+              n_Sample = 6,
+              n_Repl = 2,
+              b_Treatment = c(1.0, 0.7, 1.2),
+              sigma_plate = 0.1,
+              sigma_repl = 0.01,
+              p_sigma = 25,
+              seed = 10 )
 
 # plot data
-plot_dat(ds)
+plot_dat(ds$data)
 
-# model data
+# check some stuff
+ds$sigma_sample
+sd(ds$z_Sample)
+sd(ds$z_Plate)
+
 # random-effects model
-f00 <- brmsformula(Value ~ Treatment + (1|Sample))
-(pri00 <- get_prior(f00, data = ds))
-pri00$prior[1:3] <- "normal(0,1)"
-pri00$prior[4] <- "normal(1,1)"
-pri00$prior[5:8] <- "exponential(1)"
-fit00 <- brm(f00, data = ds,
-             prior = pri00,
-             chains = 4,
-             cores = 4,
-             iter = 5000)
-fit00
-
-# random-effects model, allowing for varying sigmas for repeated measures in treatment groups.
-# in order to get sigmas for replicates in groups: exp(sigma_Intercept) * exp(sigma_TreatmentX)
-f02 <- brmsformula( Value ~ Treatment + (1|Sample),
-                    sigma ~ Treatment)
-(pri02 <- get_prior(f02, data = ds))
-pri02$prior[2:3] <- "normal(0,0.5)"
-pri02$prior[4]   <- "normal(1,0.5)"
-pri02$prior[5]   <- "exponential(1)"
-pri02$prior[9:11] <- "student_t(3, 0, 2.5)"
-(pri02 <- pri02[ pri02$prior != "", ])
-fit02 <- brm(f02, data = ds,
-             prior = pri02,
-             chains = 4,
-             cores = 4,
-             iter = 5000,
-             control = list(adapt_delta = 0.9))
+f02 <- brmsformula(Value ~ 0 + Treatment + (1|Plate) + (1|gr(Sample, by = Plate)))
+(ps02 <- get_prior(f02, data = ds$data))
+ps02$prior[2:4]    <- "normal(1,0.25)"
+ps02$prior[c(7,9)] <- "normal(0,0.25)"
+make_stancode(f02,data = ds$data,prior = ps02)
+fit02 <- brm(f02, data = ds$data, prior = ps02, chains = 0, save_pars = save_pars(all = TRUE) ) #compile only
+fit02 <- update(fit02, newdata = ds$data, chains = 4, cores = 4, iter = 8000,control = list(adapt_delta = 0.99, max_treedepth = 15))
 fit02
-fit02.1 <- update(fit02,
-                  chains = 4,
-                  cores = 4,
-                  iter = 5000,
-                  control = list(adapt_delta = 0.99))
-fit02.1
-
-
-
-
 
