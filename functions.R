@@ -6,9 +6,11 @@ syntdat <- function(n_Run,
                     b_Treatment,
                     sigma_plate,
                     sigma_repl,
-                    p_sigma,
+                    p_sigma_sample,
                     seed  = 12432) {
+  
   set.seed(seed)
+  
   # Make indices
   n <- n_Run * n_Treatment * n_Sample * n_Repl
   n_Plate <- n_Run * n_Treatment
@@ -18,7 +20,7 @@ syntdat <- function(n_Run,
   Repl <- c(rep(rep(1:n_Repl), times=n/n_Repl))
   
   # Generate data
-  sigma_sample <- rexp(9, rate = p_sigma)
+  sigma_sample <- rexp(9, rate = p_sigma_sample)
   z_Plate  <- rnorm(n/(n_Repl * n_Sample), 0, sigma_plate)
   z_Sample <- rnorm(n/n_Repl, 0, sigma_sample[Plate[rep(c(TRUE,FALSE),n/n_Repl )]])
   z_Repl   <- rnorm(n, 0, sigma_repl)
